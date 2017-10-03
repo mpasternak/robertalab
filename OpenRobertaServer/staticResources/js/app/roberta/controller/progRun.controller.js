@@ -1,5 +1,5 @@
-define([ 'exports', 'util', 'log', 'message', 'guiState.model', 'socket.controller', 'guiState.controller', 'jquery', 'program.controller' ], function(exports, UTIL, LOG, MSG,
-        GUISTATE, SOCKET_C, GUISTATE_C, $, PROGRAM_C) {
+define([ 'exports', 'util', 'log', 'message', 'guiState.model', 'socket.controller', 'guiState.controller', 'jquery', 'program.controller' ], function(exports,
+        UTIL, LOG, MSG, GUISTATE, SOCKET_C, GUISTATE_C, $, PROGRAM_C) {
 
     function init() {
 
@@ -8,7 +8,8 @@ define([ 'exports', 'util', 'log', 'message', 'guiState.model', 'socket.controll
     function runForAutoConnection(result) {
         GUISTATE_C.setState(result);
         if (result.rc == "ok") {
-            if (GUISTATE_C.isProgramToDownload()) {
+            if (GUISTATE_C.isProgramToDownload() || navigator.userAgent.match(/iPad|iPhone/i) != null) {
+                alert('Beate');
                 var filename = GUISTATE_C.getProgramName() + '.hex';
                 UTIL.download(filename, result.compiledCode);
                 GUISTATE_C.setAutoConnectedBusy(false);
