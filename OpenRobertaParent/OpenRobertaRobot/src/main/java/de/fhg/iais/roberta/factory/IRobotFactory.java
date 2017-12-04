@@ -1,7 +1,7 @@
 package de.fhg.iais.roberta.factory;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 import com.google.inject.AbstractModule;
 
@@ -16,13 +16,16 @@ import de.fhg.iais.roberta.inter.mode.action.IMotorSide;
 import de.fhg.iais.roberta.inter.mode.action.IMotorStopMode;
 import de.fhg.iais.roberta.inter.mode.action.IShowPicture;
 import de.fhg.iais.roberta.inter.mode.action.ITurnDirection;
-import de.fhg.iais.roberta.inter.mode.action.IWorkingState;
 import de.fhg.iais.roberta.inter.mode.general.IDirection;
 import de.fhg.iais.roberta.inter.mode.general.IIndexLocation;
 import de.fhg.iais.roberta.inter.mode.general.IListElementOperations;
+import de.fhg.iais.roberta.inter.mode.general.IMode;
 import de.fhg.iais.roberta.inter.mode.general.IPickColor;
+import de.fhg.iais.roberta.inter.mode.general.IWorkingState;
 import de.fhg.iais.roberta.inter.mode.sensor.IBrickKey;
 import de.fhg.iais.roberta.inter.mode.sensor.IColorSensorMode;
+import de.fhg.iais.roberta.inter.mode.sensor.ICompassSensorMode;
+import de.fhg.iais.roberta.inter.mode.sensor.ICoordinatesMode;
 import de.fhg.iais.roberta.inter.mode.sensor.IGyroSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.IInfraredSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.IJoystickMode;
@@ -30,14 +33,59 @@ import de.fhg.iais.roberta.inter.mode.sensor.ILightSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.IMotorTachoMode;
 import de.fhg.iais.roberta.inter.mode.sensor.ISensorPort;
 import de.fhg.iais.roberta.inter.mode.sensor.ISoundSensorMode;
+import de.fhg.iais.roberta.inter.mode.sensor.ITemperatureSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.ITimerSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.ITouchSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.IUltrasonicSensorMode;
+import de.fhg.iais.roberta.inter.mode.sensor.IVoltageSensorMode;
+import de.fhg.iais.roberta.mode.action.BlinkMode;
+import de.fhg.iais.roberta.mode.action.MotorMoveMode;
+import de.fhg.iais.roberta.mode.action.MotorSide;
+import de.fhg.iais.roberta.mode.action.MotorStopMode;
+import de.fhg.iais.roberta.mode.action.MoveDirection;
+import de.fhg.iais.roberta.mode.action.TurnDirection;
+import de.fhg.iais.roberta.mode.general.Direction;
+import de.fhg.iais.roberta.mode.general.IndexLocation;
+import de.fhg.iais.roberta.mode.general.ListElementOperations;
+import de.fhg.iais.roberta.mode.general.PickColor;
+import de.fhg.iais.roberta.mode.sensor.CompassSensorMode;
+import de.fhg.iais.roberta.mode.sensor.CoordinatesMode;
+import de.fhg.iais.roberta.mode.sensor.GyroSensorMode;
+import de.fhg.iais.roberta.mode.sensor.InfraredSensorMode;
+import de.fhg.iais.roberta.mode.sensor.LightSensorMode;
+import de.fhg.iais.roberta.mode.sensor.MotorTachoMode;
+import de.fhg.iais.roberta.mode.sensor.SensorPort;
+import de.fhg.iais.roberta.mode.sensor.SoundSensorMode;
+import de.fhg.iais.roberta.mode.sensor.TemperatureSensorMode;
+import de.fhg.iais.roberta.mode.sensor.TimerSensorMode;
+import de.fhg.iais.roberta.mode.sensor.TouchSensorMode;
+import de.fhg.iais.roberta.mode.sensor.UltrasonicSensorMode;
+import de.fhg.iais.roberta.mode.sensor.VoltageSensorMode;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.check.program.RobotBrickCheckVisitor;
 import de.fhg.iais.roberta.syntax.check.program.RobotSimulationCheckVisitor;
+import de.fhg.iais.roberta.util.dbc.DbcException;
 
 public interface IRobotFactory {
+
+    static <E extends IMode> E getModeValue(String modeName, Class<E> modes) {
+        if ( (modeName == null) || modeName.isEmpty() ) {
+            throw new DbcException("Invalid " + modes.getName() + ": " + modeName);
+        }
+        final String sUpper = modeName.trim().toUpperCase(Locale.GERMAN);
+        for ( final E mode : modes.getEnumConstants() ) {
+            if ( mode.toString().equals(sUpper) ) {
+                return mode;
+            }
+            for ( final String value : mode.getValues() ) {
+                if ( sUpper.equals(value.toUpperCase()) ) {
+                    return mode;
+                }
+            }
+        }
+        throw new DbcException("Invalid " + modes.getName() + ": " + modeName);
+    }
+
     /**
      * Get index location enumeration from {@link IIndexLocation} given string parameter. It is possible for one index location to have multiple string
      * mappings. Throws exception if the operator does not exists.
@@ -45,12 +93,9 @@ public interface IRobotFactory {
      * @param indexLocation of the function
      * @return index location from the enum {@link IIndexLocation}
      */
-    IIndexLocation getIndexLocation(String indexLocation);
-
-    /**
-     * @return list of all possible enumeration values
-     */
-    List<IIndexLocation> getIndexLocations();
+    default IIndexLocation getIndexLocation(String indexLocation) {
+        return IRobotFactory.getModeValue(indexLocation, IndexLocation.class);
+    }
 
     /**
      * Direction in space enumeration from {@link IDirection} given string parameter. It is possible for one direction to have multiple string
@@ -59,12 +104,9 @@ public interface IRobotFactory {
      * @param direction of the function
      * @return direction location from the enum {@link IDirection}
      */
-    IDirection getDirection(String direction);
-
-    /**
-     * @return list of all possible enumeration values
-     */
-    List<IDirection> getDirections();
+    default IDirection getDirection(String direction) {
+        return IRobotFactory.getModeValue(direction, Direction.class);
+    }
 
     /**
      * Get array element operation enumeration from {@link IListElementOperations} given string parameter. It is possible for one operation to have multiple
@@ -73,9 +115,9 @@ public interface IRobotFactory {
      * @param operation string name
      * @return operation from the enum {@link IListElementOperations}
      */
-    IListElementOperations getListElementOpertaion(String operation);
-
-    List<IListElementOperations> getListElementOpertaions();
+    default IListElementOperations getListElementOpertaion(String operation) {
+        return IRobotFactory.getModeValue(operation, ListElementOperations.class);
+    }
 
     /**
      * Get a {@link IPickColor} enumeration given string parameter. It is possible for one color to have multiple string mappings. Throws exception if the color
@@ -84,7 +126,9 @@ public interface IRobotFactory {
      * @param name of the color
      * @return enum {@link IPickColor}
      */
-    IPickColor getPickColor(String color);
+    default IPickColor getPickColor(String color) {
+        return IRobotFactory.getModeValue(color, PickColor.class);
+    }
 
     /**
      * Get a {@link IPickColor} enumeration given a color id.
@@ -92,9 +136,14 @@ public interface IRobotFactory {
      * @param id of the color
      * @return enum {@link IPickColor}
      */
-    IPickColor getPickColor(int colorId);
-
-    List<IPickColor> getPickColor();
+    default IPickColor getPickColor(int colorId) {
+        for ( final PickColor sp : PickColor.values() ) {
+            if ( sp.getColorID() == colorId ) {
+                return sp;
+            }
+        }
+        throw new DbcException("Invalid color: " + colorId);
+    }
 
     /**
      * Get a {@link IBlinkMode} enumeration given string parameter. It is possible for one mode to have multiple string mappings. Throws exception if the mode
@@ -105,8 +154,6 @@ public interface IRobotFactory {
      */
     IBlinkMode getBlinkMode(String mode);
 
-    List<IBlinkMode> getBlinkModes();
-
     /**
      * Get a {@link IBrickLedColor} enumeration given string parameter. It is possible for one mode to have multiple string mappings. Throws exception if the
      * mode does not exists.
@@ -116,23 +163,15 @@ public interface IRobotFactory {
      */
     IBrickLedColor getBrickLedColor(String mode);
 
-    List<IBrickLedColor> getBrickLedColors();
-
     /**
      * Get a {@link ILightSensorMode} enumeration given string parameter. It is possible for one mode to have multiple string mappings. Throws exception if the
      * mode does not exists.
      */
     ILightSensorMode getLightColor(String mode);
 
-    List<ILightSensorMode> getLightColors();
-
     ILightSensorActionMode getLightActionColor(String mode);
 
-    List<ILightSensorActionMode> getLightActionColors();
-
     IWorkingState getWorkingState(String mode);
-
-    List<IWorkingState> getWorkingStates();
 
     /**
      * Get a {@link IShowPicture} enumeration given string parameter. It is possible for one picture to have multiple string mappings. Throws exception if the
@@ -143,8 +182,6 @@ public interface IRobotFactory {
      */
     IShowPicture getShowPicture(String picture);
 
-    List<IShowPicture> getShowPictures();
-
     /**
      * Get a {@link ITurnDirection} enumeration given string parameter. It is possible for one turn direction to have multiple string mappings. Throws exception
      * if the mode does not exists.
@@ -152,9 +189,9 @@ public interface IRobotFactory {
      * @param name of the turn direction
      * @return turn direction from the enum {@link ITurnDirection}
      */
-    ITurnDirection getTurnDirection(String direction);
-
-    List<ITurnDirection> getTurnDirections();
+    default ITurnDirection getTurnDirection(String direction) {
+        return IRobotFactory.getModeValue(direction, TurnDirection.class);
+    }
 
     /**
      * Get a {@link IMotorMoveMode} enumeration given string parameter. It is possible for one motor move mode to have multiple string mappings. Throws
@@ -163,9 +200,9 @@ public interface IRobotFactory {
      * @param name of the motor move mode
      * @return motor move mode from the enum {@link IMotorMoveMode}
      */
-    IMotorMoveMode getMotorMoveMode(String mode);
-
-    List<IMotorMoveMode> getMotorMoveModes();
+    default IMotorMoveMode getMotorMoveMode(String mode) {
+        return IRobotFactory.getModeValue(mode, MotorMoveMode.class);
+    }
 
     /**
      * Get actor port from {@link IActorPort} enumeration given string parameter. It is possible for actor port to have multiple string mappings. Throws
@@ -176,8 +213,6 @@ public interface IRobotFactory {
      */
     IActorPort getActorPort(String port);
 
-    List<IActorPort> getActorPorts();
-
     /**
      * Get stopping mode from {@link IMotorStopMode} from string parameter. It is possible for one stopping mode to have multiple string mappings. Throws
      * exception if the stopping mode does not exists.
@@ -185,9 +220,9 @@ public interface IRobotFactory {
      * @param name of the stopping mode
      * @return name of the stopping mode from the enum {@link IMotorStopMode}
      */
-    IMotorStopMode getMotorStopMode(String mode);
-
-    List<IMotorStopMode> getMotorStopModes();
+    default IMotorStopMode getMotorStopMode(String mode) {
+        return IRobotFactory.getModeValue(mode, MotorStopMode.class);
+    }
 
     /**
      * Get motor side from {@link IMotorSide} given string parameter. It is possible for one motor side to have multiple string mappings. Throws exception if
@@ -196,9 +231,9 @@ public interface IRobotFactory {
      * @param name of the motor side
      * @return the motor side from the enum {@link IMotorSide}
      */
-    IMotorSide getMotorSide(String motorSide);
-
-    List<IMotorStopMode> getMotorSides();
+    default IMotorSide getMotorSide(String motorSide) {
+        return IRobotFactory.getModeValue(motorSide, MotorSide.class);
+    }
 
     /**
      * Get drive direction from {@link IDriveDirection} given string parameter. It is possible for one drive direction to have multiple string mappings. Throws
@@ -207,9 +242,9 @@ public interface IRobotFactory {
      * @param name of the drive direction
      * @return the drive direction from the enum {@link IDriveDirection}
      */
-    IDriveDirection getDriveDirection(String driveDirection);
-
-    List<IDriveDirection> getDriveDirections();
+    default IDriveDirection getDriveDirection(String driveDirection) {
+        return IRobotFactory.getModeValue(driveDirection, MoveDirection.class);
+    }
 
     /**
      * Get a robot key from {@link IBrickKey} given string parameter. It is possible for one robot key to have multiple string mappings. Throws exception if the
@@ -220,8 +255,6 @@ public interface IRobotFactory {
      */
     IBrickKey getBrickKey(String brickKey);
 
-    List<IBrickKey> getBrickKeys();
-
     /**
      * Get a color sensor mode from {@link IColorSensorMode} given string parameter. It is possible for one color sensor mode to have multiple string mappings.
      * Throws exception if the color sensor mode does not exists.
@@ -229,21 +262,29 @@ public interface IRobotFactory {
      * @param name of the color sensor mode
      * @return the color sensor mode from the enum {@link IColorSensorMode}
      */
-    IColorSensorMode getColorSensorMode(String colorSensorMode);
+    IColorSensorMode getColorSensorMode(String modeName);
 
-    List<IColorSensorMode> getColorSensorModes();
+    IJoystickMode getJoystickMode(String modeName);
 
-    IJoystickMode getJoystickMode(String joystickMode);
+    default ILightSensorMode getLightSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, LightSensorMode.class);
+    }
 
-    List<IJoystickMode> getJoystickMode();
+    default ICompassSensorMode getCompassSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, CompassSensorMode.class);
+    }
 
-    ILightSensorMode getLightSensorMode(String lightrSensorMode);
+    default ITemperatureSensorMode getTemperatureSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, TemperatureSensorMode.class);
+    }
 
-    List<ILightSensorMode> getLightSensorModes();
+    default ICoordinatesMode getAccelerometerSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, CoordinatesMode.class);
+    }
 
-    ISoundSensorMode getSoundSensorMode(String soundSensorMode);
-
-    List<ISoundSensorMode> getSoundSensorModes();
+    default ISoundSensorMode getSoundSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, SoundSensorMode.class);
+    }
 
     /**
      * Get a gyro sensor mode from {@link IGyroSensorMode} given string parameter. It is possible for one gyro sensor mode to have multiple string mappings.
@@ -252,9 +293,9 @@ public interface IRobotFactory {
      * @param name of the gyro sensor mode
      * @return the gyro sensor mode from the enum {@link IGyroSensorMode}
      */
-    IGyroSensorMode getGyroSensorMode(String gyroSensorMode);
-
-    List<IGyroSensorMode> getGyroSensorModes();
+    default IGyroSensorMode getGyroSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, GyroSensorMode.class);
+    }
 
     /**
      * Get a infrared sensor mode from {@link IInfraredSensorMode} given string parameter. It is possible for one infrared sensor mode to have multiple string
@@ -263,9 +304,9 @@ public interface IRobotFactory {
      * @param name of the infrared sensor mode
      * @return the infrared sensor mode from the enum {@link IInfraredSensorMode}
      */
-    IInfraredSensorMode getInfraredSensorMode(String infraredSensorMode);
-
-    List<IInfraredSensorMode> getInfraredSensorModes();
+    default IInfraredSensorMode getInfraredSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, InfraredSensorMode.class);
+    }
 
     /**
      * Get a timer sensor mode from {@link ITimerSensorMode} given string parameter. It is possible for one timer sensor mode to have multiple string mappings.
@@ -274,9 +315,9 @@ public interface IRobotFactory {
      * @param name of the timer sensor mode
      * @return the timer sensor mode from the enum {@link ITimerSensorMode}
      */
-    ITimerSensorMode getTimerSensorMode(String timerSensroMode);
-
-    List<ITimerSensorMode> getTimerSensorModes();
+    default ITimerSensorMode getTimerSensorMode(String modeName) {
+        return IRobotFactory.getModeValue(modeName, TimerSensorMode.class);
+    }
 
     /**
      * Get a motor tacho sensor mode from {@link IMotorTachoMode} given string parameter. It is possible for one motor tacho sensor mode to have multiple string
@@ -285,9 +326,9 @@ public interface IRobotFactory {
      * @param name of the motor tacho sensor mode
      * @return the motor tacho sensor mode from the enum {@link IMotorTachoMode}
      */
-    IMotorTachoMode getMotorTachoMode(String motorTachoMode);
-
-    List<IMotorTachoMode> getMotorTachoModes();
+    default IMotorTachoMode getMotorTachoMode(String mode) {
+        return IRobotFactory.getModeValue(mode, MotorTachoMode.class);
+    }
 
     /**
      * Get a ultrasonic sensor mode from {@link IUltrasonicSensorMode} given string parameter. It is possible for one ultrasonic sensor mode to have multiple
@@ -296,9 +337,9 @@ public interface IRobotFactory {
      * @param name of the ultrasonic sensor mode
      * @return the ultrasonic sensor mode from the enum {@link IUltrasonicSensorMode}
      */
-    IUltrasonicSensorMode getUltrasonicSensorMode(String ultrasonicSensorMode);
-
-    List<IUltrasonicSensorMode> getUltrasonicSensorModes();
+    default IUltrasonicSensorMode getUltrasonicSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, UltrasonicSensorMode.class);
+    }
 
     /**
      * Get a touch sensor mode from {@link ITouchSensorMode} given string parameter. It is possible for one touch sensor mode to have multiple string mappings.
@@ -307,9 +348,21 @@ public interface IRobotFactory {
      * @param name of the touch sensor mode
      * @return the touch sensor mode from the enum {@link ITouchSensorMode}
      */
-    ITouchSensorMode getTouchSensorMode(String mode);
+    default ITouchSensorMode getTouchSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, TouchSensorMode.class);
+    }
 
-    List<ITouchSensorMode> getTouchSensorModes();
+    /**
+     * Get a touch sensor mode from {@link IVoltageSensorMode} given string parameter. It is possible for one voltage sensor mode to have multiple string
+     * mappings.
+     * Throws exception if the voltage sensor mode does not exists.
+     *
+     * @param name of the voltage sensor mode
+     * @return the volatage sensor mode from the enum {@link IVoltageSensorMode}
+     */
+    default IVoltageSensorMode getVoltageSensorMode(String mode) {
+        return IRobotFactory.getModeValue(mode, VoltageSensorMode.class);
+    }
 
     /**
      * Get a sensor port from {@link ISensorPort} given string parameter. It is possible for one sensor port to have multiple string mappings. Throws exception
@@ -318,9 +371,9 @@ public interface IRobotFactory {
      * @param name of the sensor port
      * @return the sensor port from the enum {@link ISensorPort}
      */
-    ISensorPort getSensorPort(String port);
-
-    List<ISensorPort> getSensorPorts();
+    default ISensorPort getSensorPort(String port) {
+        return IRobotFactory.getModeValue(port, SensorPort.class);
+    }
 
     /**
      * Get the compiler workflow object for this robot.
@@ -342,7 +395,9 @@ public interface IRobotFactory {
      *
      * @return the guice module for this robot or <code>null</code>, if this robot doesn't need to inject resources
      */
-    AbstractModule getGuiceModule();
+    default AbstractModule getGuiceModule() {
+        return null;
+    }
 
     /**
      * Get the file extension of the specific language for this robot. This is used when we want to download

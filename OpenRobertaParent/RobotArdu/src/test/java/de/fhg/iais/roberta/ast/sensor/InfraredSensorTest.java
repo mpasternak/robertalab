@@ -3,8 +3,8 @@ package de.fhg.iais.roberta.ast.sensor;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.fhg.iais.roberta.mode.sensor.arduino.botnroll.InfraredSensorMode;
-import de.fhg.iais.roberta.mode.sensor.arduino.botnroll.SensorPort;
+import de.fhg.iais.roberta.mode.sensors.arduino.botnroll.InfraredSensorMode;
+import de.fhg.iais.roberta.mode.sensors.arduino.botnroll.SensorPort;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.transformer.Jaxb2BlocklyProgramTransformer;
 import de.fhg.iais.roberta.util.test.ardu.HelperBotNroll;
@@ -14,9 +14,7 @@ public class InfraredSensorTest {
 
     @Test
     public void sensorSetInfrared() throws Exception {
-        String a =
-            "BlockAST [project=[[Location [x=-23, y=157], InfraredSensor [mode=OBSTACLE, port=S4]], "
-                + "[Location [x=-19, y=199], InfraredSensor [mode=SEEK, port=S3]]]]";
+        String a = "BlockAST [project=[[Location [x=-23, y=157], InfraredSensor [OBSTACLE, S4]], " + "[Location [x=-19, y=199], InfraredSensor [SEEK, S3]]]]";
 
         Assert.assertEquals(a, this.h.generateTransformerString("/ast/sensors/sensor_setInfrared.xml"));
     }

@@ -22,10 +22,8 @@ import de.fhg.iais.roberta.syntax.functions.mbed.ImageShiftFunction;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.AccelerometerOrientationSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.AccelerometerSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.AmbientLightSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GestureSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.MbedGetSampleSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MicrophoneSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.PinTouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
@@ -105,13 +103,6 @@ public interface MbedAstVisitor<V> extends AstVisitor<V> {
      * @param ledOnAction phrase to be visited
      */
     V visitLedOnAction(LedOnAction<V> ledOnAction);
-
-    /**
-     * visit a {@link AmbientLightSensor}.
-     *
-     * @param ambientLightSensor phrase to be visited
-     */
-    V visitAmbientLightSensor(AmbientLightSensor<V> ambientLightSensor);
 
     /**
      * visit a {@link RadioSendAction}.
@@ -203,13 +194,6 @@ public interface MbedAstVisitor<V> extends AstVisitor<V> {
      * @param AccelerometerOrientationSensor phrase to be visited
      */
     V visitAccelerometerOrientationSensor(AccelerometerOrientationSensor<V> accelerometerOrientationSensor);
-
-    /**
-     * visit a {@link MicrophoneSensor}.
-     *
-     * @param microphoneSensor phrase to be visited
-     */
-    V visitMicrophoneSensor(MicrophoneSensor<V> microphoneSensor);
 
     /**
      * visit a {@link RadioSetChannelAction}.

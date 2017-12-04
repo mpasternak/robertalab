@@ -1,6 +1,10 @@
 #!/bin/bash
 
 function mkAndCheckDir {
+  if [ -e "$1" ]
+  then
+    return
+  fi
   mkdir "$1"
   if [ $? -ne 0 ]
   then
@@ -90,10 +94,12 @@ function _checkJava {
 
 function _exportApplication {
     exportpath="$1"
-    if [[ -e "$exportpath" ]]
+    if [ -e "$exportpath" ] && [ ! -z "$(ls -A $exportpath)" ]
     then
-        echo "target directory \"$exportpath\" already exists - exit 1"
+        echo "target directory \"$exportpath\" exists and is not empty - exit 1"
         exit 1
+    else
+        :
     fi
     mkAndCheckDir "$exportpath"
     exportpath=$(cd "$exportpath"; pwd)
@@ -121,8 +127,8 @@ function _exportApplication {
         fi
     done
     cd ..
-    echo 'copy start scripts'
-    cp start-*.sh ${exportpath}
+    echo 'copy scripts'
+    cp start-*.sh dbBackup.sh dbShutdown.sh ${exportpath}
     chmod ugo+rx ${exportpath}/*.sh
 	echo "You are responsible to supply a usable database in directory db-${serverVersion}"
 }

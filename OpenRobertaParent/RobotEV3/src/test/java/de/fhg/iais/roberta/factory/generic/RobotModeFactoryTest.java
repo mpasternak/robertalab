@@ -7,26 +7,26 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.fhg.iais.roberta.factory.ev3.lejos.v0.Factory;
-import de.fhg.iais.roberta.mode.action.DriveDirection;
+import de.fhg.iais.roberta.mode.action.ActorPort;
+import de.fhg.iais.roberta.mode.action.BlinkMode;
+import de.fhg.iais.roberta.mode.action.BrickLedColor;
+import de.fhg.iais.roberta.mode.action.MoveDirection;
 import de.fhg.iais.roberta.mode.action.MotorMoveMode;
 import de.fhg.iais.roberta.mode.action.MotorSide;
 import de.fhg.iais.roberta.mode.action.MotorStopMode;
 import de.fhg.iais.roberta.mode.action.TurnDirection;
-import de.fhg.iais.roberta.mode.action.ev3.ActorPort;
-import de.fhg.iais.roberta.mode.action.ev3.BlinkMode;
-import de.fhg.iais.roberta.mode.action.ev3.BrickLedColor;
 import de.fhg.iais.roberta.mode.action.ev3.ShowPicture;
 import de.fhg.iais.roberta.mode.general.IndexLocation;
 import de.fhg.iais.roberta.mode.general.ListElementOperations;
 import de.fhg.iais.roberta.mode.general.PickColor;
+import de.fhg.iais.roberta.mode.sensor.ColorSensorMode;
+import de.fhg.iais.roberta.mode.sensor.GyroSensorMode;
+import de.fhg.iais.roberta.mode.sensor.InfraredSensorMode;
+import de.fhg.iais.roberta.mode.sensor.MotorTachoMode;
 import de.fhg.iais.roberta.mode.sensor.TimerSensorMode;
+import de.fhg.iais.roberta.mode.sensor.UltrasonicSensorMode;
 import de.fhg.iais.roberta.mode.sensor.ev3.BrickKey;
-import de.fhg.iais.roberta.mode.sensor.ev3.ColorSensorMode;
-import de.fhg.iais.roberta.mode.sensor.ev3.GyroSensorMode;
-import de.fhg.iais.roberta.mode.sensor.ev3.InfraredSensorMode;
-import de.fhg.iais.roberta.mode.sensor.ev3.MotorTachoMode;
 import de.fhg.iais.roberta.mode.sensor.ev3.SensorPort;
-import de.fhg.iais.roberta.mode.sensor.ev3.UltrasonicSensorMode;
 import de.fhg.iais.roberta.util.RobertaProperties;
 import de.fhg.iais.roberta.util.Util1;
 import de.fhg.iais.roberta.util.dbc.DbcException;
@@ -187,12 +187,12 @@ public class RobotModeFactoryTest {
 
     @Test
     public void getDriveDirectionFromString() {
-        Assert.assertEquals(this.factory.getDriveDirection("BACKWARD"), DriveDirection.BACKWARD);
+        Assert.assertEquals(this.factory.getDriveDirection("BACKWARD"), MoveDirection.BACKWARD);
     }
 
     @Test
     public void getDriveDirectionByAlternativeName() {
-        Assert.assertEquals(this.factory.getDriveDirection("OFF"), DriveDirection.FOREWARD);
+        Assert.assertEquals(this.factory.getDriveDirection("OFF"), MoveDirection.FOREWARD);
     }
 
     @Test(expected = DbcException.class)

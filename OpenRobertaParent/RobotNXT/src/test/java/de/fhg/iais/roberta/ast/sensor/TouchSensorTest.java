@@ -3,7 +3,7 @@ package de.fhg.iais.roberta.ast.sensor;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.fhg.iais.roberta.mode.sensor.nxt.SensorPort;
+import de.fhg.iais.roberta.mode.sensor.SensorPort;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.transformer.Jaxb2BlocklyProgramTransformer;
 import de.fhg.iais.roberta.util.test.nxt.Helper;
@@ -13,7 +13,7 @@ public class TouchSensorTest {
 
     @Test
     public void sensorTouch() throws Exception {
-        String a = "BlockAST [project=[[Location [x=-86, y=1], TouchSensor [port=S1]]]]";
+        String a = "BlockAST [project=[[Location [x=-86, y=1], TouchSensor [DEFAULT, S1]]]]";
 
         Assert.assertEquals(a, this.h.generateTransformerString("/ast/sensors/sensor_Touch.xml"));
     }

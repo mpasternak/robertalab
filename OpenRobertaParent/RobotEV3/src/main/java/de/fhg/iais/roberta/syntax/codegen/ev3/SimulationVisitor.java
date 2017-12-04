@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import de.fhg.iais.roberta.components.Configuration;
 import de.fhg.iais.roberta.inter.mode.action.IDriveDirection;
 import de.fhg.iais.roberta.inter.mode.action.ITurnDirection;
-import de.fhg.iais.roberta.mode.action.DriveDirection;
+import de.fhg.iais.roberta.mode.action.ActorPort;
+import de.fhg.iais.roberta.mode.action.MoveDirection;
 import de.fhg.iais.roberta.mode.action.TurnDirection;
-import de.fhg.iais.roberta.mode.action.ev3.ActorPort;
-import de.fhg.iais.roberta.mode.sensor.ev3.GyroSensorMode;
-import de.fhg.iais.roberta.mode.sensor.ev3.MotorTachoMode;
+import de.fhg.iais.roberta.mode.sensor.GyroSensorMode;
+import de.fhg.iais.roberta.mode.sensor.MotorTachoMode;
 import de.fhg.iais.roberta.syntax.MotorDuration;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
@@ -30,13 +30,11 @@ import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.codegen.RobotSimulationVisitor;
 import de.fhg.iais.roberta.syntax.sensor.generic.BrickSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
-import de.fhg.iais.roberta.syntax.sensor.generic.CompassSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.EncoderSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
-import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.util.dbc.Assert;
@@ -64,9 +62,9 @@ public class SimulationVisitor extends RobotSimulationVisitor<Void> {
         this.sb.append("createDriveAction(");
         driveAction.getParam().getSpeed().visit(this);
         IDriveDirection leftMotorRotationDirection = this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection();
-        DriveDirection driveDirection = (DriveDirection) driveAction.getDirection();
-        if ( leftMotorRotationDirection != DriveDirection.FOREWARD ) {
-            driveDirection = getDriveDirection(driveAction.getDirection() == DriveDirection.FOREWARD);
+        MoveDirection driveDirection = (MoveDirection) driveAction.getDirection();
+        if ( leftMotorRotationDirection != MoveDirection.FOREWARD ) {
+            driveDirection = getDriveDirection(driveAction.getDirection() == MoveDirection.FOREWARD);
         }
         this.sb.append(", CONST." + driveDirection);
         MotorDuration<Void> duration = driveAction.getParam().getDuration();
@@ -83,9 +81,9 @@ public class SimulationVisitor extends RobotSimulationVisitor<Void> {
         this.sb.append(", ");
         curveAction.getParamRight().getSpeed().visit(this);
         IDriveDirection leftMotorRotationDirection = this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection();
-        DriveDirection driveDirection = (DriveDirection) curveAction.getDirection();
-        if ( leftMotorRotationDirection != DriveDirection.FOREWARD ) {
-            driveDirection = getDriveDirection(curveAction.getDirection() == DriveDirection.FOREWARD);
+        MoveDirection driveDirection = (MoveDirection) curveAction.getDirection();
+        if ( leftMotorRotationDirection != MoveDirection.FOREWARD ) {
+            driveDirection = getDriveDirection(curveAction.getDirection() == MoveDirection.FOREWARD);
         }
         this.sb.append(", CONST." + driveDirection);
         MotorDuration<Void> duration = curveAction.getParamLeft().getDuration();
@@ -101,7 +99,7 @@ public class SimulationVisitor extends RobotSimulationVisitor<Void> {
         turnAction.getParam().getSpeed().visit(this);
         IDriveDirection leftMotorRotationDirection = this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection();
         ITurnDirection turnDirection = turnAction.getDirection();
-        if ( leftMotorRotationDirection != DriveDirection.FOREWARD ) {
+        if ( leftMotorRotationDirection != MoveDirection.FOREWARD ) {
             turnDirection = getTurnDirection(turnAction.getDirection() == TurnDirection.LEFT);
         }
         this.sb.append(", CONST." + turnDirection);
@@ -295,16 +293,4 @@ public class SimulationVisitor extends RobotSimulationVisitor<Void> {
         this.sb.append("createGetSample(CONST.SOUND)");
         return null;
     }
-
-    @Override
-    public Void visitCompassSensor(CompassSensor<Void> compassSensor) {
-        return null;
-    }
-
-    @Override
-    public Void visitTemperatureSensor(TemperatureSensor<Void> temperatureSensor) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

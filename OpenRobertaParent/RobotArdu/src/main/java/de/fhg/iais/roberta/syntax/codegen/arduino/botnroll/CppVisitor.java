@@ -7,19 +7,15 @@ import de.fhg.iais.roberta.components.SensorType;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.components.arduino.BotNrollConfiguration;
 import de.fhg.iais.roberta.inter.mode.sensor.IColorSensorMode;
-import de.fhg.iais.roberta.mode.action.DriveDirection;
+import de.fhg.iais.roberta.mode.action.BlinkMode;
 import de.fhg.iais.roberta.mode.action.MotorStopMode;
+import de.fhg.iais.roberta.mode.action.MoveDirection;
 import de.fhg.iais.roberta.mode.action.TurnDirection;
-import de.fhg.iais.roberta.mode.action.arduino.botnroll.ActorPort;
-import de.fhg.iais.roberta.mode.action.arduino.botnroll.BlinkMode;
-import de.fhg.iais.roberta.mode.sensor.arduino.botnroll.BrickKey;
-import de.fhg.iais.roberta.mode.sensor.arduino.botnroll.ColorSensorMode;
-import de.fhg.iais.roberta.mode.sensor.arduino.botnroll.InfraredSensorMode;
+import de.fhg.iais.roberta.mode.actors.arduino.botnroll.ActorPort;
+import de.fhg.iais.roberta.mode.sensor.ColorSensorMode;
+import de.fhg.iais.roberta.mode.sensors.arduino.botnroll.BrickKey;
+import de.fhg.iais.roberta.mode.sensors.arduino.botnroll.InfraredSensorMode;
 import de.fhg.iais.roberta.syntax.Phrase;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOnAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOnAction;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowPictureAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
@@ -37,13 +33,16 @@ import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOnAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOnAction;
 import de.fhg.iais.roberta.syntax.check.hardware.arduino.botnroll.UsedHardwareCollectorVisitor;
 import de.fhg.iais.roberta.syntax.codegen.arduino.ArduinoVisitor;
-import de.fhg.iais.roberta.syntax.expr.arduino.RgbColor;
+import de.fhg.iais.roberta.syntax.expressions.arduino.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.SensorExpr;
-import de.fhg.iais.roberta.syntax.sensor.arduino.botnroll.VoltageSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.BrickSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.CompassSensor;
@@ -55,16 +54,17 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.VoltageSensor;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.visitor.AstVisitor;
-import de.fhg.iais.roberta.visitor.arduino.BotnrollAstVisitor;
+import de.fhg.iais.roberta.visitors.arduino.ArduinoAstVisitor;
 
 /**
  * This class is implementing {@link AstVisitor}. All methods are implemented and they append a human-readable C representation of a phrase to a
  * StringBuilder. <b>This representation is correct C code for Arduino.</b> <br>
  */
-public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Void> {
+public class CppVisitor extends ArduinoVisitor implements ArduinoAstVisitor<Void> {
     private final BotNrollConfiguration brickConfiguration;
     private final boolean isTimerSensorUsed;
 
@@ -116,7 +116,7 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
         if ( tt.getKind().hasName("SENSOR_EXPR") ) {
             de.fhg.iais.roberta.syntax.sensor.Sensor<Void> sens = ((SensorExpr<Void>) tt).getSens();
             if ( sens.getKind().hasName("COLOR_SENSING") ) {
-                mode = ((ColorSensor<Void>) sens).getMode();
+                mode = (IColorSensorMode) ((ColorSensor<Void>) sens).getMode();
             }
         }
 
@@ -129,8 +129,8 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
 
         this.sb.append("(");
 
-        if ( isVar && (varType.equals("STRING") || varType.equals("COLOR"))
-            || mode != null && !mode.toString().equals("RED") && !mode.toString().equals("RGB") ) {
+        if ( (isVar && (varType.equals("STRING") || varType.equals("COLOR")))
+            || ((mode != null) && !mode.toString().equals("RED") && !mode.toString().equals("RGB")) ) {
             toChar = ".c_str()";
         }
 
@@ -209,12 +209,12 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
     @Override
     public Void visitMotorOnAction(MotorOnAction<Void> motorOnAction) {
         final boolean reverse =
-            this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == DriveDirection.BACKWARD
-                || this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == DriveDirection.BACKWARD;
+            (this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == MoveDirection.BACKWARD)
+                || (this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == MoveDirection.BACKWARD);
         String methodName;
         String port = null;
         final boolean isDuration = motorOnAction.getParam().getDuration() != null;
-        final boolean isServo = motorOnAction.getPort() == ActorPort.A || motorOnAction.getPort() == ActorPort.D;
+        final boolean isServo = (motorOnAction.getPort() == ActorPort.A) || (motorOnAction.getPort() == ActorPort.D);
         if ( isServo ) {
             methodName = motorOnAction.getPort() == ActorPort.A ? "one.servo1(" : "one.servo2(";
         } else {
@@ -268,9 +268,9 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
                 || this.brickConfiguration.getActorOnPort(ActorPort.A).isRegulated();
         final boolean isDuration = driveAction.getParam().getDuration() != null;
         final boolean reverse =
-            this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == DriveDirection.BACKWARD
-                || this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == DriveDirection.BACKWARD;
-        final boolean localReverse = driveAction.getDirection() == DriveDirection.BACKWARD;
+            (this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == MoveDirection.BACKWARD)
+                || (this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == MoveDirection.BACKWARD);
+        final boolean localReverse = driveAction.getDirection() == MoveDirection.BACKWARD;
         String methodName;
         String sign = "";
         if ( isDuration ) {
@@ -283,7 +283,7 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
         }
         methodName = methodName + "(";
         this.sb.append(methodName);
-        if ( !reverse && localReverse || reverse && !localReverse ) {
+        if ( (!reverse && localReverse) || (reverse && !localReverse) ) {
             sign = "-";
         }
         this.sb.append(sign);
@@ -306,9 +306,9 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
                 || this.brickConfiguration.getActorOnPort(ActorPort.A).isRegulated();
         final boolean isDuration = curveAction.getParamLeft().getDuration() != null;
         final boolean reverse =
-            this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == DriveDirection.BACKWARD
-                || this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == DriveDirection.BACKWARD;
-        final boolean localReverse = curveAction.getDirection() == DriveDirection.BACKWARD;
+            (this.brickConfiguration.getActorOnPort(this.brickConfiguration.getLeftMotorPort()).getRotationDirection() == MoveDirection.BACKWARD)
+                || (this.brickConfiguration.getActorOnPort(ActorPort.A).getRotationDirection() == MoveDirection.BACKWARD);
+        final boolean localReverse = curveAction.getDirection() == MoveDirection.BACKWARD;
         String methodName;
         String sign = "";
         if ( isDuration ) {
@@ -321,7 +321,7 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
         }
         methodName = methodName + "(";
         this.sb.append(methodName);
-        if ( !reverse && localReverse || reverse && !localReverse ) {
+        if ( (!reverse && localReverse) || (reverse && !localReverse) ) {
             sign = "-";
         }
         this.sb.append(sign);
@@ -343,8 +343,8 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
         Actor rightMotor = this.brickConfiguration.getRightMotor();
         boolean isRegulatedDrive = leftMotor.isRegulated() || rightMotor.isRegulated();
         boolean isDuration = turnAction.getParam().getDuration() != null;
-        boolean isReverseLeftMotor = leftMotor.getRotationDirection() == DriveDirection.BACKWARD;
-        boolean isReverseRightMotor = rightMotor.getRotationDirection() == DriveDirection.BACKWARD;
+        boolean isReverseLeftMotor = leftMotor.getRotationDirection() == MoveDirection.BACKWARD;
+        boolean isReverseRightMotor = rightMotor.getRotationDirection() == MoveDirection.BACKWARD;
         boolean isTurnRight = turnAction.getDirection() == TurnDirection.RIGHT;
 
         String methodName;
@@ -602,6 +602,7 @@ public class CppVisitor extends ArduinoVisitor implements BotnrollAstVisitor<Voi
                     nlIndent();
                     this.sb.append("brm.setSonarStatus(ENABLE);");
                     break;
+                case VOLTAGE:
                 case TIMER:
                 case LIGHT:
                 case COMPASS:

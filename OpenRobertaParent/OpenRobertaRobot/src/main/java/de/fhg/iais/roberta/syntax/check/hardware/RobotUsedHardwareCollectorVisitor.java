@@ -9,6 +9,7 @@ import de.fhg.iais.roberta.components.Configuration;
 import de.fhg.iais.roberta.components.SensorType;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.components.UsedSensor;
+import de.fhg.iais.roberta.mode.sensor.TouchSensorMode;
 import de.fhg.iais.roberta.syntax.action.communication.BluetoothCheckConnectAction;
 import de.fhg.iais.roberta.syntax.action.communication.BluetoothConnectAction;
 import de.fhg.iais.roberta.syntax.action.communication.BluetoothReceiveAction;
@@ -41,9 +42,11 @@ import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.VoltageSensor;
 import de.fhg.iais.roberta.visitor.actor.AstActorCommunicationVisitor;
 import de.fhg.iais.roberta.visitor.actor.AstActorDisplayVisitor;
 import de.fhg.iais.roberta.visitor.actor.AstActorLightVisitor;
@@ -108,6 +111,18 @@ public abstract class RobotUsedHardwareCollectorVisitor extends CheckVisitor imp
         this.usedSensors.add(new UsedSensor(soundSensor.getPort(), SensorType.SOUND, soundSensor.getMode()));
         return null;
     }
+    
+    @Override
+    public Void visitTemperatureSensor(TemperatureSensor<Void> temperatureSensor) {
+        this.usedSensors.add(new UsedSensor(temperatureSensor.getPort(), SensorType.TEMPERATURE, temperatureSensor.getMode()));
+        return null;
+    }
+    
+    @Override
+    public Void visitVoltageSensor(VoltageSensor<Void> voltageSensor){
+        this.usedSensors.add(new UsedSensor(voltageSensor.getPort(), SensorType.VOLTAGE, voltageSensor.getMode()));
+        return null;
+    }
 
     @Override
     public Void visitEncoderSensor(EncoderSensor<Void> encoderSensor) {
@@ -134,7 +149,7 @@ public abstract class RobotUsedHardwareCollectorVisitor extends CheckVisitor imp
 
     @Override
     public Void visitTouchSensor(TouchSensor<Void> touchSensor) {
-        this.usedSensors.add(new UsedSensor(touchSensor.getPort(), SensorType.TOUCH, touchSensor.getMode()));
+        this.usedSensors.add(new UsedSensor(touchSensor.getPort(), SensorType.TOUCH, TouchSensorMode.TOUCH));
         return null;
     }
 

@@ -1,0 +1,14 @@
+FROM openjdk:8u151-jdk
+ 
+RUN mkdir --parent /opt/openRoberta/lib /opt/openRoberta/OpenRobertaParent
+WORKDIR /opt/openRoberta
+
+EXPOSE 1999
+VOLUME /opt/db
+ 
+ADD ["start-ora-server-with-db-embedded.sh","./"]
+ADD ["lib/","./lib/"]
+ADD ["OpenRobertaParent/","./OpenRobertaParent/"]
+RUN chmod -R ugo+rwx . 
+
+ENTRYPOINT ["/opt/openRoberta/start-ora-server-with-db-embedded.sh","-docker"]

@@ -3,7 +3,7 @@ package de.fhg.iais.roberta.ast.syntax.sensor.makeblock;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.fhg.iais.roberta.mode.sensor.arduino.mbot.SensorPort;
+import de.fag.iais.roberta.mode.sensor.arduino.mbot.SensorPort;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.transformer.Jaxb2BlocklyProgramTransformer;
 import de.fhg.iais.roberta.util.test.ardu.HelperMakeBlock;
@@ -13,7 +13,7 @@ public class TemperatureSensorTest {
 
     @Test
     public void jaxbToAst_byDefault_temperatureSensorOnPort4() throws Exception {
-        String a = "BlockAST [project=[[Location [x=113, y=88], TemperatureSensor [PORT_4]]]]";
+        String a = "BlockAST [project=[[Location [x=113, y=88], TemperatureSensor [DEFAULT, PORT_4]]]]";
 
         Assert.assertEquals(a, this.h.generateTransformerString("/ast/sensors/sensor_temperature.xml"));
     }

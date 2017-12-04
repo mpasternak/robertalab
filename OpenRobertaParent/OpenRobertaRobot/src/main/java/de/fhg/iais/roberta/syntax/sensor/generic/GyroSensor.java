@@ -7,12 +7,14 @@ import de.fhg.iais.roberta.blockly.generated.Field;
 import de.fhg.iais.roberta.factory.IRobotFactory;
 import de.fhg.iais.roberta.inter.mode.sensor.IGyroSensorMode;
 import de.fhg.iais.roberta.inter.mode.sensor.ISensorPort;
+import de.fhg.iais.roberta.mode.sensor.GyroSensorMode;
+import de.fhg.iais.roberta.mode.sensor.SensorPort;
 import de.fhg.iais.roberta.syntax.BlockTypeContainer;
 import de.fhg.iais.roberta.syntax.BlocklyBlockProperties;
 import de.fhg.iais.roberta.syntax.BlocklyComment;
 import de.fhg.iais.roberta.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.syntax.Phrase;
-import de.fhg.iais.roberta.syntax.sensor.BaseSensor;
+import de.fhg.iais.roberta.syntax.sensor.ExternalSensor;
 import de.fhg.iais.roberta.transformer.Jaxb2AstTransformer;
 import de.fhg.iais.roberta.transformer.JaxbTransformerHelper;
 import de.fhg.iais.roberta.util.dbc.Assert;
@@ -29,13 +31,11 @@ import de.fhg.iais.roberta.visitor.sensor.AstSensorsVisitor;
  * <br>
  * To create an instance from this class use the method {@link #make(GyroSensorMode, SensorPort, BlocklyBlockProperties, BlocklyComment)}.<br>
  */
-public class GyroSensor<V> extends BaseSensor<V> {
-    private final IGyroSensorMode mode;
+public class GyroSensor<V> extends ExternalSensor<V> {
 
     private GyroSensor(IGyroSensorMode mode, ISensorPort port, BlocklyBlockProperties properties, BlocklyComment comment) {
-        super(port, BlockTypeContainer.getByName("GYRO_SENSING"), properties, comment);
+        super(mode, port, BlockTypeContainer.getByName("GYRO_SENSING"), properties, comment);
         Assert.isTrue(mode != null && port != null);
-        this.mode = mode;
         setReadOnly();
     }
 
@@ -52,16 +52,9 @@ public class GyroSensor<V> extends BaseSensor<V> {
         return new GyroSensor<V>(mode, port, properties, comment);
     }
 
-    /**
-     * @return get the mode of sensor. See enum {@link GyroSensorMode} for all possible modes that the sensor have.
-     */
-    public IGyroSensorMode getMode() {
-        return this.mode;
-    }
-
     @Override
     public String toString() {
-        return "GyroSensor [mode=" + this.mode + ", port=" + getPort() + "]";
+        return "GyroSensor [" + this.getMode() + ", " + getPort() + "]";
     }
 
     @Override
@@ -86,7 +79,7 @@ public class GyroSensor<V> extends BaseSensor<V> {
         }
         List<Field> fields = helper.extractFields(block, (short) 2);
         String portName = helper.extractField(fields, BlocklyConstants.SENSORPORT);
-        String modeName = helper.extractField(fields, BlocklyConstants.MODE_);
+        String modeName = helper.extractField(fields, BlocklyConstants.MODE);
         return GyroSensor
             .make(factory.getGyroSensorMode(modeName), factory.getSensorPort(portName), helper.extractBlockProperties(block), helper.extractComment(block));
     }
@@ -98,7 +91,7 @@ public class GyroSensor<V> extends BaseSensor<V> {
 
         String fieldValue = getPort().getPortNumber();
         if ( getMode().toString().equals("ANGLE") || getMode().toString().equals("RATE") ) {
-            JaxbTransformerHelper.addField(jaxbDestination, BlocklyConstants.MODE_, getMode().toString());
+            JaxbTransformerHelper.addField(jaxbDestination, BlocklyConstants.MODE, getMode().toString());
         }
         JaxbTransformerHelper.addField(jaxbDestination, BlocklyConstants.SENSORPORT, fieldValue);
         return jaxbDestination;

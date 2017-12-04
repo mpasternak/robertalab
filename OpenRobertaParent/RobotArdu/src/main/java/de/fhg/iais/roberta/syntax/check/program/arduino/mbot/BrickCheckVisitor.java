@@ -1,25 +1,25 @@
 package de.fhg.iais.roberta.syntax.check.program.arduino.mbot;
 
 import de.fhg.iais.roberta.components.Configuration;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.DisplayImageAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.DisplayTextAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOnAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOnAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.DisplayImageAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.DisplayTextAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOnAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOnAction;
 import de.fhg.iais.roberta.syntax.check.program.RobotBrickCheckVisitor;
-import de.fhg.iais.roberta.syntax.expr.arduino.LedMatrix;
-import de.fhg.iais.roberta.syntax.expr.arduino.RgbColor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.Accelerometer;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.AmbientLightSensor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.FlameSensor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.GetSampleSensor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.Joystick;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.PIRMotionSensor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.mbot.VoltageSensor;
+import de.fhg.iais.roberta.syntax.expressions.arduino.LedMatrix;
+import de.fhg.iais.roberta.syntax.expressions.arduino.RgbColor;
+import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
-import de.fhg.iais.roberta.visitor.arduino.MbotAstVisitor;
+import de.fhg.iais.roberta.syntax.sensor.generic.VoltageSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.mbot.AmbientLightSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.mbot.FlameSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.mbot.GetSampleSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.mbot.Joystick;
+import de.fhg.iais.roberta.syntax.sensors.arduino.mbot.PIRMotionSensor;
+import de.fhg.iais.roberta.visitors.arduino.MbotAstVisitor;
 
 public class BrickCheckVisitor extends RobotBrickCheckVisitor implements MbotAstVisitor<Void> {
 
@@ -77,7 +77,7 @@ public class BrickCheckVisitor extends RobotBrickCheckVisitor implements MbotAst
     }
 
     @Override
-    public Void visitAccelerometer(Accelerometer<Void> accelerometer) {
+    public Void visitAccelerometer(AccelerometerSensor<Void> accelerometer) {
         // TODO Auto-generated method stub
         return null;
     }

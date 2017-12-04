@@ -1,6 +1,9 @@
 package de.fhg.iais.roberta.main;
 
 import java.io.StringWriter;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import de.fhg.iais.roberta.blockly.generated.BlockSet;
 import de.fhg.iais.roberta.blockly.generated.Instance;
+import de.fhg.iais.roberta.persistence.util.DbExecutor;
 import de.fhg.iais.roberta.persistence.util.DbSetup;
 import de.fhg.iais.roberta.persistence.util.SessionFactoryWrapper;
 import de.fhg.iais.roberta.syntax.Phrase;
@@ -63,6 +67,12 @@ public class Administration {
             case "sql":
                 adminWork.runSql();
                 break;
+            case "dbBackup":
+                adminWork.dbBackup();
+                break;
+            case "dbShutdown":
+                adminWork.dbShutdown();
+                break;
             case "conf:xml2text":
                 // adminWork.confXml2text();
                 break;
@@ -106,6 +116,53 @@ public class Administration {
         }
         nativeSession.getTransaction().rollback();
         nativeSession.close();
+    }
+
+    /**
+     * backup the database. Needs the second parameter from the main args, which has to be the database URI (e.g. "jdbc:hsqldb:hsql://localhost/openroberta-db")
+     */
+    private void dbBackup() {
+        Administration.LOG.info("*** dbBackup. This makes sense in SERVER mode ONLY ***");
+        expectArgs(2);
+        SessionFactoryWrapper sessionFactoryWrapper = new SessionFactoryWrapper("hibernate-cfg.xml", this.args[1]);
+        Session nativeSession = sessionFactoryWrapper.getNativeSession();
+        DbExecutor dbExecutor = DbExecutor.make(nativeSession);
+        nativeSession.beginTransaction();
+
+        long users = ((BigInteger) dbExecutor.oneValueSelect("select count(*) from USER")).longValue();
+        long programs = ((BigInteger) dbExecutor.oneValueSelect("select count(*) from PROGRAM;")).longValue();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+        String backupFileName = "backup/dbBackup-" + now.format(formatter) + "-u" + users + "-p" + programs + ".tgz";
+
+        dbExecutor.ddl("BACKUP DATABASE TO '" + backupFileName + "' BLOCKING;");
+        LOG.info("backup succeeded for a database with " + users + " users and " + programs + " programs");
+
+        nativeSession.getTransaction().commit();
+        nativeSession.close();
+    }
+
+    /**
+     * shutdown the database. Needs the second parameter from the main args, which has to be the database URI (e.g.
+     * "jdbc:hsqldb:hsql://localhost/openroberta-db")
+     */
+    private void dbShutdown() {
+        Administration.LOG.info("*** dbShutdown. This makes sense in SERVER mode ONLY ***");
+        expectArgs(2);
+        SessionFactoryWrapper sessionFactoryWrapper = new SessionFactoryWrapper("hibernate-cfg.xml", this.args[1]);
+        Session nativeSession = sessionFactoryWrapper.getNativeSession();
+        DbExecutor dbExecutor = DbExecutor.make(nativeSession);
+        nativeSession.beginTransaction();
+
+        long users = ((BigInteger) dbExecutor.oneValueSelect("select count(*) from USER")).longValue();
+        long programs = ((BigInteger) dbExecutor.oneValueSelect("select count(*) from PROGRAM;")).longValue();
+
+        try {
+            dbExecutor.ddl("SHUTDOWN COMPACT;");
+        } finally {
+            LOG.info("shutdown compact succeeded for a database with " + users + " users and " + programs + " programs");
+        }
     }
 
     private String xml2Ast2xml(String updatedProgram) throws Exception, JAXBException {

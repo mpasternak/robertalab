@@ -4,38 +4,24 @@ import java.util.ArrayList;
 
 import de.fhg.iais.roberta.components.arduino.BotNrollConfiguration;
 import de.fhg.iais.roberta.syntax.Phrase;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.ExternalLedOnAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOffAction;
-import de.fhg.iais.roberta.syntax.action.arduino.mbot.LedOnAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.ExternalLedOnAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOffAction;
+import de.fhg.iais.roberta.syntax.actors.arduino.mbot.LedOnAction;
 import de.fhg.iais.roberta.syntax.check.hardware.RobotUsedHardwareCollectorVisitor;
-import de.fhg.iais.roberta.syntax.expr.arduino.RgbColor;
-import de.fhg.iais.roberta.syntax.sensor.arduino.botnroll.VoltageSensor;
-import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
-import de.fhg.iais.roberta.visitor.arduino.BotnrollAstVisitor;
+import de.fhg.iais.roberta.syntax.expressions.arduino.RgbColor;
+import de.fhg.iais.roberta.visitors.arduino.ArduinoAstVisitor;
 
 /**
  * This visitor collects information for used actors and sensors in blockly program.
  *
  * @author kcvejoski
  */
-public class UsedHardwareCollectorVisitor extends RobotUsedHardwareCollectorVisitor implements BotnrollAstVisitor<Void> {
+public class UsedHardwareCollectorVisitor extends RobotUsedHardwareCollectorVisitor implements ArduinoAstVisitor<Void> {
 
     public UsedHardwareCollectorVisitor(ArrayList<ArrayList<Phrase<Void>>> phrasesSet, BotNrollConfiguration configuration) {
         super(configuration);
         check(phrasesSet);
-    }
-
-    @Override
-    public Void visitVoltageSensor(VoltageSensor<Void> voltageSensor) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Void visitTemperatureSensor(TemperatureSensor<Void> temperatureSensor) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
