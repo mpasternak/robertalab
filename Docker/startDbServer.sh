@@ -1,40 +1,19 @@
 #!/bin/bash
-
 # start of the openroberta database server in a docker container.
 
-SERVERLOGFILE='./ora-server.log'
-echo "startServer.sh [-log <file-name>] [server parameter ...]  Default log file name: $SERVERLOGFILE"
+VERSION=''
+DB_BASEDIR=/opt/db
 
-while [ true ]
-do
-    case "$1" in
-      -log) SERVERLOGFILE=$2
-            shift; shift ;;
-      *)    break ;;
-    esac
-done
+echo "startDbServer.sh <x.y.z> <"
 
-echo "Server log file is: $SERVERLOGFILE"
-echo "Parameters for the server are: $*"
+VERSION=$1
 
-echo java  -cp lib/\* de.fhg.iais.roberta.main.ServerStarter $* >>$SERVERLOGFILE 2>&1
+if [ -z "$VERSION" ]
+then
+    echo "db version is missing - exit 12"
+    exit 12
+fi
 
-VERSION='2.4.0'
-LOGFILE='./ora-db.log'
-
-echo "startDbServer.sh  [-version <x.y.z>] [-log <file-name>]  Default version: $VERSION, default log file name: $LOGFILE"
-
-while [ true ]
-do
-	case "$1" in
-	  -version) VERSION=$2
-			    shift; shift ;;
-	  -log)     LOGFILE=$2
-			    shift; shift ;;
-	  *)	    break ;;
-	esac
-done
-
-DATABASE=db-${serverVersion}/openroberta-db
-echo "the database server will use database directory $DATABASE"
-java -cp lib/\* org.hsqldb.Server --database.0 file:$DATABASE --dbname.0 openroberta-db \$* >>$DBLOGFILE 2>&1
+DATABASE=db-${VERSION}/openroberta-db
+echo "the database server will use database directory $DATABASE in base directory $DB_BASEDIR"
+java -cp lib/\* org.hsqldb.Server --database.0 file:$DB_BASEDIR/$DATABASE --dbname.0 openroberta-db

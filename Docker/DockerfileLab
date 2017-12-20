@@ -3,13 +3,13 @@ FROM openjdk:8u151-jdk
 RUN mkdir --parent /opt/openRoberta/lib /opt/openRoberta/OpenRobertaParent
 WORKDIR /opt/openRoberta
 
-EXPOSE 1999
+EXPOSE 9001
 VOLUME /opt/db
  
-ADD ["start-ora-server-with-db-embedded.sh","./"]
-ADD ["lib/","./lib/"]
-ADD ["OpenRobertaParent/","./OpenRobertaParent/"]
+COPY ["startServer.sh","./"]
+COPY ["lib/","./lib/"]
+COPY ["OpenRobertaParent/","./OpenRobertaParent/"]
 RUN chmod -R ugo+rwx . 
 
 ENTRYPOINT ["/opt/openRoberta/startServer.sh"]
-CMD ["-d","database.mode=embedded","-d","database.parentdir=/opt/db"]
+# usually -d parameter are needed, when the container is started, e.g. -d database.mode=embedded -d database.parentdir=/opt/db

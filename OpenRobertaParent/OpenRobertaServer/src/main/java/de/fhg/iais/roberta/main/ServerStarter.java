@@ -209,12 +209,13 @@ public class ServerStarter {
     private void setupPropertyForDatabaseConnection(Properties properties) {
         String serverVersion = properties.getProperty("openRobertaServer.version");
         String databaseParentDir = properties.getProperty("database.parentdir");
+        String databaseUri = properties.getProperty("database.uri");
         String databaseMode = properties.getProperty("database.mode");
         String dbUrl;
         if ( "embedded".equals(databaseMode) ) {
             dbUrl = "jdbc:hsqldb:file:" + databaseParentDir + "/db-" + serverVersion + "/openroberta-db";
         } else if ( "server".equals(databaseMode) ) {
-            dbUrl = "jdbc:hsqldb:hsql://localhost/openroberta-db";
+            dbUrl = "jdbc:hsqldb:hsql://" + databaseUri + "/openroberta-db";
         } else {
             throw new DbcException("invalid database mode (use either embedded or server): " + databaseMode);
         }
